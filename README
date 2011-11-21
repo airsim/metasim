@@ -1,1 +1,11 @@
 = MetaSim =
+
+Development helpers for the simulator components.
+
+1/ Please check that you have ruby and rake installed.
+
+2/ Check the default configuration in 'metasim.yaml'.
+
+3/ Display the list of available targets:
+
+    $ rake --tasks
