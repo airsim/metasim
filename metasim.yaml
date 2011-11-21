@@ -1,0 +1,52 @@
+# MetaSim configuration file
+branch: trunk
+cmake_args: '-DLIB_SUFFIX=64 -DCMAKE_BUILD_TYPE:STRING=Debug -DINSTALL_DOC:BOOL=ON'
+publish_path: /tmp/metasim
+components:
+  stdair: []
+  airrac: 
+  - stdair
+  trademgen:
+  - stdair
+  simfqt: 
+  - stdair
+  sevmgr: 
+  - stdair
+  airsched: 
+  - stdair
+  travelccm: 
+  - stdair
+  rmol: 
+  - stdair
+  - airrac
+  airinv: 
+  - stdair
+  - airrac
+  - rmol
+  avlcal: 
+  - stdair
+  - airrac
+  - rmol
+  - airinv
+  simlfs: 
+  - stdair
+  - airrac
+  - rmol
+  - airinv
+  - simfqt
+  simcrs: 
+  - stdair
+  - airrac
+  - rmol
+  - airinv
+  - airsched
+  - simfqt
+  dsim: 
+  - stdair
+  - airrac
+  - rmol
+  - airinv
+  - trademgen
+  - travelccm
+  - airsched
+  - simfqt
