@@ -43,6 +43,27 @@ def do_shell(cmd)
   raise "Shell command failure" unless system(cmd)
 end
 
+# Lookup the version of a component
+def component_version(cmp)
+  cmp_src_path = component_src_path cmp
+  cmp_build_path = component_buid_path cmp
+  cmake_vars = {}
+  if File.executable?(cmp_src_path) && File.executable?(cmp_build_path)
+    ::Dir.chdir(cmp_build_path) do
+      result = %x[ #{CMAKE_BIN} -N -LA #{cmp_src_path} ]
+      if $?.success?
+        result.split("\n").each do |line|
+          variable, value = line.split(':', 2)
+          cmake_vars[variable] = value.split('=', 2).last if value
+        end
+      else
+        STDERR.puts "CMake error while loading the cache from #{cmp_build_path}"
+      end
+    end
+  end
+  cmake_vars['PACKAGE_VERSION']
+end
+
 desc "Display configuration information"
 task :info do
   puts "Components:"
@@ -65,6 +86,9 @@ task :clone
 
 desc "Checkout all components"
 task :checkout
+
+desc "Pull changes on all components"
+task :pull
 
 desc "Configure all components"
 task :configure
@@ -99,6 +123,16 @@ CONF_COMPONENTS.each do |cmp, cmp_deps|
     end
   end
   task :checkout => "checkout_#{cmp}"
+  
+  # Pull tasks
+  
+  desc "Pull changes on component #{cmp}"
+  task "pull_#{cmp}" => cmp_src_path do
+    ::Dir.chdir(cmp_src_path) do
+      do_shell "#{GIT_BIN} pull"
+    end
+  end
+  task :pull => "pull_#{cmp}"
   
   # Configuration tasks
    
@@ -140,26 +174,30 @@ CONF_COMPONENTS.each do |cmp, cmp_deps|
   
   # Distribution tasks
   
-  version = "99.99.99" #TODO: extract version from CMake cache
-  arch_name = "#{cmp}-#{version}.tar.bz2"
-  arch_path_src = File.join cmp_build_path, arch_name
-  
-  file arch_path_src => cmp_makefile do
-    ::Dir.chdir(cmp_build_path) do
-      do_shell "#{MAKE_BIN} dist"
+  cmp_version = component_version cmp
+  if cmp_version
+    arch_name = "#{cmp}-#{cmp_version}.tar.bz2"
+    arch_path_src = File.join cmp_build_path, arch_name
+    
+    file arch_path_src => cmp_makefile do
+      ::Dir.chdir(cmp_build_path) do
+        do_shell "#{MAKE_BIN} dist"
+      end
     end
+    
+    directory CONF_PUBLISH_PATH
+    
+    arch_path_dst = File.join CONF_PUBLISH_PATH, arch_name
+    
+    file arch_path_dst => [arch_path_src, CONF_PUBLISH_PATH] do
+      cp arch_path_src, arch_path_dst
+    end
+    desc "Publish component #{cmp} to #{arch_path_dst}"
+    task "dist_#{cmp}" => arch_path_dst
+    task :dist => "dist_#{cmp}"
+  else
+    puts "Warning: package version of component #{cmp} is not available. You have to install it first."
   end
-  
-  directory CONF_PUBLISH_PATH
-  
-  arch_path_dst = File.join CONF_PUBLISH_PATH, arch_name
-  
-  file arch_path_dst => [arch_path_src, CONF_PUBLISH_PATH] do
-    cp arch_path_src, arch_path_dst
-  end
-  desc "Publish component #{cmp} to #{arch_path_dst}"
-  task "dist_#{cmp}" => arch_path_dst
-  task :dist => "dist_#{cmp}"
 end
 
 task :default => :install
