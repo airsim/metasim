@@ -110,7 +110,7 @@ CONF_COMPONENTS.each do |cmp, cmp_deps|
   # Checkout tasks
   
   file cmp_src_path => WORK_PATH do
-    do_shell "#{GIT_BIN} clone git://gitorious.orinet.nce.amadeus.net/#{cmp}/#{cmp}.git #{cmp_src_path}"
+    do_shell "#{GIT_BIN} clone #{CONF_GIT_BASE_REPO}/#{cmp}.git #{cmp_src_path}"
   end
   desc "Clone component #{cmp} in #{cmp_src_path}"
   task "clone_#{cmp}" => cmp_src_path
