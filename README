@@ -3,9 +3,19 @@
 Development helpers for the simulator components.
 
 1/ Please check that you have ruby and rake installed.
+   On Fedora, for instance, the packages can be installed with:
+   yum -y install rubygem-rake ruby ruby-libs
 
-2/ Check the default configuration in 'metasim.yaml'.
+2/ Copy the 'metasim.yaml.sample' sample configuration file
+   as 'metasim.yaml'. Then, alter it according to your environment.
 
 3/ Display the list of available targets:
 
     $ rake --tasks
+
+   For instance:
+    $ rake checkout
+    $ rake configure
+    $ rake install
+    $ rake dist
+
