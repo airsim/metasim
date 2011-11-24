@@ -190,7 +190,7 @@ COMPONENTS.each do |cmp|
   # Pull tasks
   
   desc "Pull changes on component #{cmp}"
-  task "pull_#{cmp}" => "checkout_#{cmp}" do
+  task "pull_#{cmp}" => cmp_src_path do
     ::Dir.chdir(cmp_src_path) do
       do_shell "#{GIT_BIN} pull"
     end
