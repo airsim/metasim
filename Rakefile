@@ -179,16 +179,6 @@ COMPONENTS.each do |cmp|
   task "clone_#{cmp}" => cmp_src_path
   task :clone => "clone_#{cmp}"
   
-  desc "Checkout branch #{cmp_branch} of component #{cmp}"
-  task "checkout_#{cmp}" => cmp_src_path do
-    ::Dir.chdir(cmp_src_path) do
-      do_shell "#{GIT_BIN} checkout #{cmp_branch}"
-    end
-  end
-  task :checkout => "checkout_#{cmp}"
-  
-  # Pull tasks
-  
   desc "Pull changes on component #{cmp}"
   task "pull_#{cmp}" => cmp_src_path do
     ::Dir.chdir(cmp_src_path) do
@@ -196,6 +186,14 @@ COMPONENTS.each do |cmp|
     end
   end
   task :pull => "pull_#{cmp}"
+  
+  desc "Checkout branch #{cmp_branch} of component #{cmp}"
+  task "checkout_#{cmp}" => "pull_#{cmp}" do
+    ::Dir.chdir(cmp_src_path) do
+      do_shell "#{GIT_BIN} checkout #{cmp_branch}"
+    end
+  end
+  task :checkout => "checkout_#{cmp}"
   
   # Configuration tasks
    
