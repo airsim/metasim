@@ -1,6 +1,6 @@
 # MetaSim configuration file
-git_base_repo: git@github.com:airsim/metasim.git
-default_branch: releases
+default_base_repo: 'git@github.com:airsim'
+default_branch: trunk
 cmake_args: '-DLIB_SUFFIX=64 -DCMAKE_BUILD_TYPE:STRING=Debug -DINSTALL_DOC:BOOL=ON'
 publish_path: /tmp/metasim
 components:
@@ -12,7 +12,6 @@ components:
   simfqt:
     deps: [stdair]
   sevmgr: 
-    branch: trunk
     deps: [stdair]
   airsched: 
     deps: [stdair]

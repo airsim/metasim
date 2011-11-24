@@ -14,6 +14,7 @@ end
 [
   'components',
   'default_branch',
+  'default_base_repo',
   'cmake_args',
   'publish_path'
 ].each do |param|
@@ -64,6 +65,11 @@ def component_deps(cmp)
   CONF_COMPONENTS[cmp].fetch('deps', [])
 end
 
+# Lookup the repository of a component
+def component_repo(cmp)
+  CONF_COMPONENTS[cmp].fetch('repo', "#{CONF_DEFAULT_BASE_REPO}/#{cmp}.git")
+end
+
 # Lookup the CMake variables of a component
 def lookup_cmake_vars(cmp) 
   cmp_src_path = component_src_path cmp
@@ -93,8 +99,7 @@ end
 
 # Version of a component
 def component_version(cmp)
-  vars = component_cmake_vars cmp
-  vars.fetch('PACKAGE_VERSION', '0.0.1')
+  component_cmake_vars(cmp)['PACKAGE_VERSION']
 end
 
 # Library path of a component
@@ -109,10 +114,12 @@ task :info do
   puts "Components:"
   COMPONENTS.each do |cmp|
     cmp_deps = component_deps cmp
+    cmp_repo = component_repo cmp
     cmp_branch = component_branch cmp
     cmp_version = component_version cmp
     cmp_libpath = component_libpath cmp
     puts " * #{cmp}"
+    puts "   Git repository   : #{cmp_repo}"
     puts "   Checkout branch  : #{cmp_branch}"
     puts "   Depends on       : #{cmp_deps.join ', '}" unless cmp_deps.empty?
     puts "   Source cloned at : #{component_src_path cmp}"
@@ -154,6 +161,7 @@ task :dist
 
 COMPONENTS.each do |cmp|
   cmp_deps = component_deps cmp
+  cmp_repo = component_repo cmp
   cmp_branch = component_branch cmp
   cmp_src_path = component_src_path cmp
   cmp_build_path = component_build_path cmp
@@ -162,7 +170,7 @@ COMPONENTS.each do |cmp|
   # Checkout tasks
   
   file cmp_src_path => WORK_PATH do
-    do_shell "#{GIT_BIN} clone #{CONF_GIT_BASE_REPO}/#{cmp}.git #{cmp_src_path}"
+    do_shell "#{GIT_BIN} clone -n #{cmp_repo} #{cmp_src_path}"
   end
   desc "Clone component #{cmp} in #{cmp_src_path}"
   task "clone_#{cmp}" => cmp_src_path
