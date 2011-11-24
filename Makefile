@@ -1,5 +1,5 @@
 all:
-	rake --tasks
+	rake
 
 %:
 	rake $@
