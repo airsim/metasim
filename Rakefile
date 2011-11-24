@@ -11,6 +11,17 @@ CONF.each do |param, val|
   Object.const_set "CONF_#{param.upcase}", val
 end
 
+[
+  'components',
+  'default_branch',
+  'cmake_args',
+  'publish_path'
+].each do |param|
+  raise "Missing mandatory parameter '#{param}' in configuration file." unless CONF[param]
+end
+
+COMPONENTS = CONF_COMPONENTS.keys
+
 # MetaSim workspace
 WORK_PATH = File.join ROOT_PATH, 'workspace'
 
@@ -28,7 +39,7 @@ def component_src_path(cmp)
 end
 
 # Path to build output
-def component_buid_path(cmp)
+def component_build_path(cmp)
   File.join WORK_PATH, 'build', cmp
 end
 
@@ -43,10 +54,20 @@ def do_shell(cmd)
   raise "Shell command failure" unless system(cmd)
 end
 
-# Lookup the version of a component
-def component_version(cmp)
+# Lookup the Git branch of a component
+def component_branch(cmp)
+  CONF_COMPONENTS[cmp].fetch('branch', CONF_DEFAULT_BRANCH)
+end
+
+# Lookup the build dependencies of a component
+def component_deps(cmp)
+  CONF_COMPONENTS[cmp].fetch('deps', [])
+end
+
+# Lookup the CMake variables of a component
+def lookup_cmake_vars(cmp) 
   cmp_src_path = component_src_path cmp
-  cmp_build_path = component_buid_path cmp
+  cmp_build_path = component_build_path cmp
   cmake_vars = {}
   if File.executable?(cmp_src_path) && File.executable?(cmp_build_path)
     ::Dir.chdir(cmp_build_path) do
@@ -61,20 +82,46 @@ def component_version(cmp)
       end
     end
   end
-  cmake_vars['PACKAGE_VERSION']
+  cmake_vars
+end
+
+COMPONENTS_CMAKE_VARS = {}
+
+def component_cmake_vars(cmp)
+  COMPONENTS_CMAKE_VARS[cmp] ||= lookup_cmake_vars cmp
+end
+
+# Version of a component
+def component_version(cmp)
+  vars = component_cmake_vars cmp
+  vars.fetch('PACKAGE_VERSION', '0.0.1')
+end
+
+# Library path of a component
+def component_libpath(cmp)
+  vars = component_cmake_vars cmp
+  libdir = vars.fetch('INSTALL_LIB_DIR', 'lib')
+  File.join component_install_path(cmp), libdir
 end
 
 desc "Display configuration information"
 task :info do
   puts "Components:"
-  CONF_COMPONENTS.each do |cmp, cmp_deps|
+  COMPONENTS.each do |cmp|
+    cmp_deps = component_deps cmp
+    cmp_branch = component_branch cmp
+    cmp_version = component_version cmp
+    cmp_libpath = component_libpath cmp
     puts " * #{cmp}"
-    puts "   Depends on #{cmp_deps.join ', '}" unless cmp_deps.empty?
-    puts "   Source cloned at #{component_src_path cmp}"
-    puts "   Built from #{component_buid_path cmp}"
-    puts "   Installed to #{component_install_path cmp}"
+    puts "   Checkout branch  : #{cmp_branch}"
+    puts "   Depends on       : #{cmp_deps.join ', '}" unless cmp_deps.empty?
+    puts "   Source cloned at : #{component_src_path cmp}"
+    puts "   Built from       : #{component_build_path cmp}"
+    puts "   Installed to     : #{component_install_path cmp}"
+    puts "   Library path     : #{cmp_libpath}"
+    puts "   Release version  : #{cmp_version}" if cmp_version
+    puts
   end
-  puts "Checkout branch : #{CONF_BRANCH}"
   puts "CMake arguments : #{CONF_CMAKE_ARGS}"
   puts "Publish to      : #{CONF_PUBLISH_PATH}"
 end
@@ -93,6 +140,9 @@ task :pull
 desc "Configure all components"
 task :configure
 
+desc "Check all components"
+task :check
+
 desc "Install all components"
 task :install
 
@@ -102,9 +152,11 @@ task :clean
 desc "Distribute all components"
 task :dist
 
-CONF_COMPONENTS.each do |cmp, cmp_deps|
+COMPONENTS.each do |cmp|
+  cmp_deps = component_deps cmp
+  cmp_branch = component_branch cmp
   cmp_src_path = component_src_path cmp
-  cmp_build_path = component_buid_path cmp
+  cmp_build_path = component_build_path cmp
   cmp_install_path = component_install_path cmp
   
   # Checkout tasks
@@ -116,10 +168,10 @@ CONF_COMPONENTS.each do |cmp, cmp_deps|
   task "clone_#{cmp}" => cmp_src_path
   task :clone => "clone_#{cmp}"
   
-  desc "Checkout branch #{CONF_BRANCH} of component #{cmp}"
+  desc "Checkout branch #{cmp_branch} of component #{cmp}"
   task "checkout_#{cmp}" => cmp_src_path do
     ::Dir.chdir(cmp_src_path) do
-      do_shell "#{GIT_BIN} checkout #{CONF_BRANCH}"
+      do_shell "#{GIT_BIN} checkout #{cmp_branch}"
     end
   end
   task :checkout => "checkout_#{cmp}"
@@ -151,6 +203,16 @@ CONF_COMPONENTS.each do |cmp, cmp_deps|
   desc "Configure component #{cmp} in #{cmp_build_path}"
   task "configure_#{cmp}" => cmp_makefile
   task :configure => "configure_#{cmp}"
+  
+  # Check tasks
+  
+  desc "Check component #{cmp} in #{cmp_build_path}"
+  task "check_#{cmp}" => cmp_makefile do
+    ::Dir.chdir(cmp_build_path) do
+      do_shell "#{MAKE_BIN} check"
+    end
+  end
+  task :check => "check_#{cmp}"
   
   # Installation tasks
   
