@@ -35,7 +35,7 @@ BINARIES.each do |bin|
 end
 
 # Number of make jobs
-MAKE_JOBS = ENV['jobs'].to_i rescue 1
+MAKE_JOBS = [ENV['jobs'].to_i, 1].max
 
 # Path to cloned sources
 def component_src_path(cmp)
