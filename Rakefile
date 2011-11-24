@@ -34,6 +34,9 @@ BINARIES.each do |bin|
   Object.const_set "#{bin.upcase}_BIN", bin_path
 end
 
+# Number of make jobs
+MAKE_JOBS = ENV['jobs'].to_i rescue 1
+
 # Path to cloned sources
 def component_src_path(cmp)
   File.join WORK_PATH, 'src', cmp
@@ -166,7 +169,7 @@ COMPONENTS.each do |cmp|
   cmp_src_path = component_src_path cmp
   cmp_build_path = component_build_path cmp
   cmp_install_path = component_install_path cmp
-  
+   
   # Checkout tasks
   
   file cmp_src_path => WORK_PATH do
@@ -217,7 +220,7 @@ COMPONENTS.each do |cmp|
   desc "Check component #{cmp} in #{cmp_build_path}"
   task "check_#{cmp}" => cmp_makefile do
     ::Dir.chdir(cmp_build_path) do
-      do_shell "#{MAKE_BIN} check"
+      do_shell "#{MAKE_BIN} -j#{MAKE_JOBS} check"
     end
   end
   task :check => "check_#{cmp}"
@@ -227,7 +230,7 @@ COMPONENTS.each do |cmp|
   desc "Install component #{cmp} to #{cmp_install_path}"
   task "install_#{cmp}" => cmp_makefile do
     ::Dir.chdir(cmp_build_path) do
-      do_shell "#{MAKE_BIN} install"
+      do_shell "#{MAKE_BIN} -j#{MAKE_JOBS} install"
     end
   end
   task :install => "install_#{cmp}"
