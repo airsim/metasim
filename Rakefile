@@ -54,7 +54,7 @@ end
 
 # Run a shell command
 def do_shell(cmd)
-  puts "METASIM: #{cmd}"
+  puts "[METASIM]:#{Dir.pwd}$ #{cmd}"
   raise "Shell command failure" unless system(cmd)
 end
 
@@ -112,6 +112,11 @@ def component_libpath(cmp)
   File.join component_install_path(cmp), libdir
 end
 
+# Makefile of a component
+def component_makefile(cmp)
+  File.join component_build_path(cmp), 'Makefile'
+end
+
 desc "Display configuration information"
 task :info do
   puts "Components:"
@@ -138,29 +143,21 @@ end
 
 directory WORK_PATH
 
-desc "Clone all components"
-task :clone
+# Define all global tasks
 
-desc "Checkout all components"
-task :checkout
-
-desc "Pull changes on all components"
-task :pull
-
-desc "Configure all components"
-task :configure
-
-desc "Check all components"
-task :check
-
-desc "Install all components"
-task :install
-
-desc "Clean all components"
-task :clean
-
-desc "Distribute all components"
-task :dist
+SIMPLE_GIT_TASKS = [
+  :status, :push, :pull
+]
+SIMPLE_MAKE_TASKS = [
+  :check, :install, :clean, :rebuild_cache
+]
+COMPLEX_TASKS = [
+  :clone, :checkout, :configure, :dist
+]
+(SIMPLE_GIT_TASKS + SIMPLE_MAKE_TASKS + COMPLEX_TASKS).each do |t|
+  desc "#{t.to_s.capitalize} on all components"
+  task t
+end
 
 COMPONENTS.each do |cmp|
   cmp_deps = component_deps cmp
@@ -169,8 +166,9 @@ COMPONENTS.each do |cmp|
   cmp_src_path = component_src_path cmp
   cmp_build_path = component_build_path cmp
   cmp_install_path = component_install_path cmp
+  cmp_makefile = component_makefile cmp
    
-  # Checkout tasks
+  # Clone tasks
   
   file cmp_src_path => WORK_PATH do
     do_shell "#{GIT_BIN} clone -n #{cmp_repo} #{cmp_src_path}"
@@ -178,14 +176,21 @@ COMPONENTS.each do |cmp|
   desc "Clone component #{cmp} in #{cmp_src_path}"
   task "clone_#{cmp}" => cmp_src_path
   task :clone => "clone_#{cmp}"
-  
-  desc "Pull changes on component #{cmp}"
-  task "pull_#{cmp}" => cmp_src_path do
-    ::Dir.chdir(cmp_src_path) do
-      do_shell "#{GIT_BIN} pull"
+
+  # Wrappers for simple git tasks
+    
+  SIMPLE_GIT_TASKS.each do |gittask|
+    cmp_task = "#{gittask}_#{cmp}"
+    desc "#{gittask.to_s.capitalize} on component #{cmp} in #{cmp_src_path}"
+    task cmp_task => cmp_src_path do
+      ::Dir.chdir(cmp_src_path) do
+        do_shell "#{GIT_BIN} #{gittask}"
+      end
     end
+    task gittask => cmp_task
   end
-  task :pull => "pull_#{cmp}"
+  
+  # Checkout tasks
   
   desc "Checkout branch #{cmp_branch} of component #{cmp}"
   task "checkout_#{cmp}" => "pull_#{cmp}" do
@@ -201,8 +206,6 @@ COMPONENTS.each do |cmp|
   
   config_prereqs = ["checkout_#{cmp}"] + cmp_deps.map { |dep| "install_#{dep}" }
   
-  cmp_makefile = File.join cmp_build_path, 'Makefile'
-  
   file cmp_makefile => config_prereqs do
     mkdir_p cmp_build_path
     ::Dir.chdir(cmp_build_path) do
@@ -212,37 +215,20 @@ COMPONENTS.each do |cmp|
   desc "Configure component #{cmp} in #{cmp_build_path}"
   task "configure_#{cmp}" => cmp_makefile
   task :configure => "configure_#{cmp}"
-  
-  # Check tasks
-  
-  desc "Check component #{cmp} in #{cmp_build_path}"
-  task "check_#{cmp}" => cmp_makefile do
-    ::Dir.chdir(cmp_build_path) do
-      do_shell "#{MAKE_BIN} -j#{MAKE_JOBS} check"
+
+  # Wrappers for simple make tasks
+
+  SIMPLE_MAKE_TASKS.each do |maketask|
+    cmp_task = "#{maketask}_#{cmp}"
+    desc "#{maketask.to_s.capitalize} on component #{cmp} in #{cmp_build_path}"
+    task cmp_task => cmp_makefile do
+      ::Dir.chdir(cmp_build_path) do
+        do_shell "#{MAKE_BIN} -j#{MAKE_JOBS} #{maketask}"
+      end
     end
+    task maketask => cmp_task
   end
-  task :check => "check_#{cmp}"
-  
-  # Installation tasks
-  
-  desc "Install component #{cmp} to #{cmp_install_path}"
-  task "install_#{cmp}" => cmp_makefile do
-    ::Dir.chdir(cmp_build_path) do
-      do_shell "#{MAKE_BIN} -j#{MAKE_JOBS} install"
-    end
-  end
-  task :install => "install_#{cmp}"
-  
-  # Cleaning tasks
-  
-  desc "Clean component #{cmp} in #{cmp_build_path}"
-  task "clean_#{cmp}" => cmp_makefile do
-    ::Dir.chdir(cmp_build_path) do
-      do_shell "#{MAKE_BIN} clean rebuild_cache"
-    end
-  end
-  task :clean => "clean_#{cmp}"
-  
+ 
   # Distribution tasks
   
   cmp_version = component_version cmp
