@@ -238,7 +238,7 @@ COMPONENTS.each do |cmp|
   desc "Clean component #{cmp} in #{cmp_build_path}"
   task "clean_#{cmp}" => cmp_makefile do
     ::Dir.chdir(cmp_build_path) do
-      do_shell "#{MAKE_BIN} clean"
+      do_shell "#{MAKE_BIN} clean rebuild_cache"
     end
   end
   task :clean => "clean_#{cmp}"
