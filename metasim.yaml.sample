@@ -28,4 +28,4 @@ components:
   simcrs:
     deps: [stdair, airrac, rmol, airinv, simfqt, airsched]
   dsim:
-    deps: [stdair, airrac, rmol, airinv, simfqt, airsched, trademgen, travelccm]
+    deps: [stdair, airrac, rmol, airinv, simfqt, airsched, simcrs, trademgen, travelccm]
