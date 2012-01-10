@@ -8,7 +8,7 @@ components:
   airrac:
     deps: [stdair]
   trademgen:
-    deps: [stdair]
+    deps: [stdair, sevmgr]
   simfqt:
     deps: [stdair]
   sevmgr: 
@@ -28,4 +28,4 @@ components:
   simcrs:
     deps: [stdair, airrac, rmol, airinv, simfqt, airsched]
   dsim:
-    deps: [stdair, airrac, rmol, airinv, simfqt, airsched, simcrs, trademgen, travelccm]
+    deps: [stdair, airrac, rmol, airinv, simfqt, airsched, simcrs, trademgen, sevmgr, travelccm]
