@@ -20,12 +20,12 @@ components:
   rmol:
     deps: [stdair, airrac]
   airinv:
-    deps: [stdair, airrac, rmol]
+    deps: [stdair, airrac, rmol, sevmgr]
   avlcal:
     deps: [stdair, airrac, rmol, airinv]
   simlfs:
-    deps: [stdair, airrac, rmol, airinv, simfqt]
+    deps: [stdair, airrac, rmol, sevmgr, airinv, simfqt]
   simcrs:
-    deps: [stdair, airrac, rmol, airinv, simfqt, airsched]
+    deps: [stdair, airrac, rmol, sevmgr, airinv, simfqt, airsched]
   dsim:
     deps: [stdair, airrac, rmol, airinv, simfqt, airsched, simcrs, trademgen, sevmgr, travelccm]
