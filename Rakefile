@@ -193,11 +193,12 @@ COMPONENTS.each do |cmp|
   # Checkout tasks
   
   desc "Checkout branch #{cmp_branch} of component #{cmp}"
-  task "checkout_#{cmp}" => "pull_#{cmp}" do
+  task "checkout_#{cmp}" do
     ::Dir.chdir(cmp_src_path) do
       do_shell "#{GIT_BIN} checkout #{cmp_branch}"
     end
   end
+  task("checkout_#{cmp}" => "pull_#{cmp}") unless ENV['offline']
   task :checkout => "checkout_#{cmp}"
   
   # Configuration tasks
