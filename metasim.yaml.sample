@@ -4,28 +4,29 @@ default_branch: trunk
 cmake_args: '-DLIB_SUFFIX=64 -DCMAKE_BUILD_TYPE:STRING=Debug -DINSTALL_DOC:BOOL=ON'
 publish_path: /tmp/metasim
 components:
-  stdair: {}
-  airrac:
+  - name: dsim
+    deps: [stdair, airrac, rmol, airinv, simfqt, airsched, simcrs, trademgen, sevmgr, travelccm]  
+  - name: simcrs 
+    deps: [stdair, airrac, rmol, sevmgr, airinv, simfqt, airsched] 
+  - name: simlfs
+    deps: [stdair, airrac, rmol, sevmgr, airinv, simfqt]  
+  - name: avlcal 
+    deps: [stdair, airrac, rmol, airinv]   
+  - name: airinv
+    deps: [stdair, airrac, rmol, sevmgr]  
+  - name: trademgen
+    deps: [stdair, sevmgr]   
+  - name: rmol
+    deps: [stdair, airrac] 
+  - name: simfqt
     deps: [stdair]
-  trademgen:
-    deps: [stdair, sevmgr]
-  simfqt:
+  - name: airsched
     deps: [stdair]
-  sevmgr: 
+  - name: travelccm
+    deps: [stdair] 
+  - name: sevmgr
+    deps: [stdair] 
+  - name: airrac
     deps: [stdair]
-  airsched: 
-    deps: [stdair]
-  travelccm: 
-    deps: [stdair]
-  rmol:
-    deps: [stdair, airrac]
-  airinv:
-    deps: [stdair, airrac, rmol, sevmgr]
-  avlcal:
-    deps: [stdair, airrac, rmol, airinv]
-  simlfs:
-    deps: [stdair, airrac, rmol, sevmgr, airinv, simfqt]
-  simcrs:
-    deps: [stdair, airrac, rmol, sevmgr, airinv, simfqt, airsched]
-  dsim:
-    deps: [stdair, airrac, rmol, airinv, simfqt, airsched, simcrs, trademgen, sevmgr, travelccm]
+  - name: stdair 
+    deps: {}
