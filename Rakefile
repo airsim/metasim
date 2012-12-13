@@ -21,7 +21,12 @@ end
   raise "Missing mandatory parameter '#{param}' in configuration file." unless CONF[param]
 end
 
-COMPONENTS = CONF_COMPONENTS.keys
+if CONF_COMPONENTS.kind_of? Hash
+  STDERR.puts "Warning: obsolete components syntax loaded from configuration file."
+  CONF_COMPONENTS = CONF_COMPONENTS.map { |k,v| {'name' => k}.merge v }
+end
+
+COMPONENTS = CONF_COMPONENTS.map { |c| c['name'] }
 
 # MetaSim workspace
 WORK_PATH = File.join ROOT_PATH, 'workspace'
@@ -58,19 +63,23 @@ def do_shell(cmd)
   raise "Shell command failure" unless system(cmd)
 end
 
+def component(cmp)
+  CONF_COMPONENTS.select { |c| c['name'] == cmp }.first
+end
+
 # Lookup the Git branch of a component
 def component_branch(cmp)
-  CONF_COMPONENTS[cmp].fetch('branch', CONF_DEFAULT_BRANCH)
+  component(cmp).fetch('branch', CONF_DEFAULT_BRANCH)
 end
 
 # Lookup the build dependencies of a component
 def component_deps(cmp)
-  CONF_COMPONENTS[cmp].fetch('deps', [])
+  component(cmp).fetch('deps', [])
 end
 
 # Lookup the repository of a component
 def component_repo(cmp)
-  CONF_COMPONENTS[cmp].fetch('repo', "#{CONF_DEFAULT_BASE_REPO}/#{cmp}.git")
+  component(cmp).fetch('repo', "#{CONF_DEFAULT_BASE_REPO}/#{cmp}.git")
 end
 
 # Lookup the CMake variables of a component
