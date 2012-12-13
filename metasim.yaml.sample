@@ -1,31 +1,45 @@
 # MetaSim configuration file
-default_base_repo: 'git://github.com/airsim'
+default_base_repo: 'git@github.com:airsim'
 default_branch: trunk
-cmake_args: '-DLIB_SUFFIX=64 -DCMAKE_BUILD_TYPE:STRING=Debug -DINSTALL_DOC:BOOL=ON'
+cmake_args: '-DLIB_SUFFIX=64 -DCMAKE_BUILD_TYPE:STRING=Debug -DINSTALL_DOC:BOOL=ON -DENABLE_TEST:BOOL=ON -DRUN_GCOV:BOOL=ON'
 publish_path: /tmp/metasim
 components:
-  stdair: {}
-  airrac:
+  - name: dsim
+    repo: 'git@github.com:airsim/dsim.git'
+    deps: [stdair, airrac, rmol, airinv, simfqt, airsched, simcrs, trademgen, sevmgr, travelccm]  
+  - name: simcrs 
+    repo: 'git@github.com:airsim/simcrs.git'
+    deps: [stdair, airrac, rmol, sevmgr, airinv, simfqt, airsched] 
+  - name: simlfs
+    repo: 'git@github.com:airsim/simlfs.git'
+    deps: [stdair, airrac, rmol, sevmgr, airinv, simfqt]  
+  - name: avlcal 
+    repo: 'git@github.com:airsim/avlcal.git'
+    deps: [stdair, airrac, rmol, airinv]   
+  - name: airinv
+    repo: 'git@github.com:airsim/airinv.git'
+    deps: [stdair, airrac, rmol, sevmgr]  
+  - name: trademgen
+    repo: 'git@github.com:airsim/trademgen.git'
+    deps: [stdair, sevmgr]   
+  - name: rmol
+    repo: 'git@github.com:airsim/rmol.git'
+    deps: [stdair, airrac] 
+  - name: simfqt
+    repo: 'git@github.com:airsim/simfqt.git'
     deps: [stdair]
-  trademgen:
-    deps: [stdair, sevmgr]
-  simfqt:
+  - name: airsched
+    repo: 'git@github.com:airsim/airsched.git'
     deps: [stdair]
-  sevmgr: 
+  - name: travelccm
+    repo: 'git@github.com:airsim/travelccm.git'
+    deps: [stdair] 
+  - name: sevmgr
+    repo: 'git@github.com:airsim/sevmgr.git'
+    deps: [stdair] 
+  - name: airrac
+    repo: 'git@github.com:airsim/airrac.git'
     deps: [stdair]
-  airsched: 
-    deps: [stdair]
-  travelccm: 
-    deps: [stdair]
-  rmol:
-    deps: [stdair, airrac]
-  airinv:
-    deps: [stdair, airrac, rmol, sevmgr]
-  avlcal:
-    deps: [stdair, airrac, rmol, airinv]
-  simlfs:
-    deps: [stdair, airrac, rmol, sevmgr, airinv, simfqt]
-  simcrs:
-    deps: [stdair, airrac, rmol, sevmgr, airinv, simfqt, airsched]
-  dsim:
-    deps: [stdair, airrac, rmol, airinv, simfqt, airsched, simcrs, trademgen, sevmgr, travelccm]
+  - name: stdair 
+    repo: 'git@github.com:airsim/stdair.git'
+    deps: {}
