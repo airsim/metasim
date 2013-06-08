@@ -6,10 +6,10 @@ publish_path: /tmp/metasim
 components:
   - name: tvlsim
     repo: 'git@github.com:airsim/tvlsim.git'
-    deps: [stdair, airrac, rmol, airinv, simfqt, airsched, simcrs, trademgen, sevmgr, travelccm]  
+    deps: [stdair, airrac, rmol, airinv, simfqt, airtsp, simcrs, trademgen, sevmgr, travelccm]  
   - name: simcrs 
     repo: 'git@github.com:airsim/simcrs.git'
-    deps: [stdair, airrac, rmol, sevmgr, airinv, simfqt, airsched] 
+    deps: [stdair, airrac, rmol, sevmgr, airinv, simfqt, airtsp] 
   - name: simlfs
     repo: 'git@github.com:airsim/simlfs.git'
     deps: [stdair, airrac, rmol, sevmgr, airinv, simfqt]  
@@ -28,8 +28,8 @@ components:
   - name: simfqt
     repo: 'git@github.com:airsim/simfqt.git'
     deps: [stdair]
-  - name: airsched
-    repo: 'git@github.com:airsim/airsched.git'
+  - name: airtsp
+    repo: 'git@github.com:airsim/airtsp.git'
     deps: [stdair]
   - name: travelccm
     repo: 'git@github.com:airsim/travelccm.git'
