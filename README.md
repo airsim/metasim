@@ -105,8 +105,9 @@ $ sudo make install
 * C++, Python and Ruby:
 ```bash
 $ brew install boost boost-python boost-python3 cmake libedit \
-  sqlite mysql icu4c protobuf protobuf-c doxygen
-$ brew install homebrew/portable-ruby/portable-readline
+  sqlite mysql icu4c protobuf protobuf-c zeromq doxygen
+$ wget https://raw.githubusercontent.com/zeromq/cppzmq/master/zmq.hpp -O /usr/local/include/zmq.hpp
+$ brew install readline homebrew/portable-ruby/portable-readline
 $ brew install pyenv
 $ brew install rbenv ruby-build
 ```
