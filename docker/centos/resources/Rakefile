@@ -35,8 +35,11 @@ WORK_PATH = File.join ROOT_PATH, 'workspace'
 BINARIES = ['git', 'cmake', 'make']
 BINARIES.each do |bin|
   bin_path = %x[ which #{bin} ].strip
-  if bin_path == '' && bin == 'cmake'
-    bin_path = %x[ which cmake3 ].strip
+  if bin == 'cmake'
+    cmake3_path = %x[ which cmake3 ].strip
+    if not cmake3_path == ''
+      bin_path = cmake3_path
+    end
   end
   raise "Executable #{bin} not found!" unless File.executable?(bin_path)
   Object.const_set "#{bin.upcase}_BIN", bin_path
