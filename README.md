@@ -66,10 +66,11 @@ $ sudo yum -y install epel-release
 * Install a few useful packages:
 ```bash
 $ sudo yum -y install less htop net-tools which sudo man vim \
-        git-all wget curl file which bash-completion keyutils Lmod \
+        git-all wget curl file bash-completion keyutils Lmod \
         zlib-devel bzip2-devel gzip tar rpmconf yum-utils \
         gcc gcc-c++ cmake cmake3 m4 \
-        zeromq-devel czmq-devel \
+		lcov cppunit-devel \
+        zeromq-devel czmq-devel cppzmq-devel \
         boost-devel xapian-core-devel openssl-devel libffi-devel \
         mpich-devel openmpi-devel \
         readline-devel sqlite-devel mariadb-devel \
@@ -79,7 +80,7 @@ $ sudo yum -y install less htop net-tools which sudo man vim \
         python34 python34-pip python34-devel \
         python2-django mod_wsgi \
         geos-devel geos-python \
-        doxygen ghostscript "tex(latex)" \
+        doxygen ghostscript "tex(latex)" texlive-epstopdf-bin \
 		rake rubygem-rake ruby-libs
 ```
 
