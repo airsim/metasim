@@ -18,9 +18,6 @@ USER root
 ADD resources/ssh-config $HOME/.ssh/config
 RUN chown build.build $HOME/.ssh/config
 
-# Ruby utilities (for the builds)
-RUN yum -y update && yum -y install rake rubygem-rake
-
 # Switch to the `build` user
 USER build
 
