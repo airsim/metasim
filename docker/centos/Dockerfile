@@ -2,7 +2,7 @@
 # http://github.com/airsim/metasim/tree/master/docker/centos
 # Umbrella project for the Travel Market Simulator (TvlSim / AirSim)
 #
-FROM cpppythondevelopment/base:centos
+FROM cpppythondevelopment/base:centos7
 MAINTAINER Denis Arnaud <denis.arnaud_github at m4x dot org>
 
 # Docker build time environment variables
