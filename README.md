@@ -16,9 +16,9 @@ ready-to-develop, ready-to-contribute environment. Enjoy!
 
 # References
 * Travel/Airline Market Simulator (TvlSim / AirSim):
-  + Source code on GitHub: http://github.com/airsim
+  + Source code on GitHub: https://github.com/airsim
   + Docker Cloud repository: https://cloud.docker.com/u/tvlsim/repository/docker/tvlsim/metasim
-  + Official Web site: http://travel-market-simulator.com
+  + Official Web site: https://travel-sim.org
 
 # Run the Docker image
 * As a quick starter, some test cases can be launched from the
