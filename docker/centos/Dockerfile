@@ -13,6 +13,9 @@ ENV LANG en_US.UTF-8
 ENV LC_ALL $LANG
 ENV SIM_DIR $HOME/dev/sim
 
+# Temporary (as of 25 April 2019) up until boost169-1.69.0-2 reaches stable repos
+yum -y --enablerepo=epel-testing install boost169-devel
+
 # Switch to the `root` user for complementary installation and configuration
 USER root
 ADD resources/ssh-config $HOME/.ssh/config
