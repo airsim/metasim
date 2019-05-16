@@ -1,6 +1,8 @@
 MetaSim - Umbrella project for the Travel Market Simulator (TvlSim / AirSim)
 ============================================================================
 
+[![Docker Repository on Quay](https://quay.io/repository/tvlsim/metasim/status "Docker Repository on Quay")](https://quay.io/repository/tvlsim/metasim)
+
 Development helpers for the simulator components.
 
 The `metasim` project itself is an umbrella, allowing to drive all
