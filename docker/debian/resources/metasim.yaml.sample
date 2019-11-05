@@ -1,6 +1,6 @@
 # MetaSim configuration file
 default_base_repo: 'https://github.com/airsim'
-default_branch: trunk
+default_branch: master
 cmake_args: '-DLIB_SUFFIX=64 -DCMAKE_BUILD_TYPE:STRING=Debug -DINSTALL_DOC:BOOL=ON -DENABLE_TEST:BOOL=ON -DRUN_GCOV:BOOL=OFF'
 publish_path: /tmp/metasim
 components:
