@@ -15,6 +15,8 @@ ENV SIM_DIR $HOME/dev/sim
 
 # Switch to the `root` user for complementary installation and configuration
 USER root
+RUN dnf -y remove boost169-devel
+RUN dnf -y install boost-devel boost-python3-devel
 ADD resources/ssh-config $HOME/.ssh/config
 RUN chown build.build $HOME/.ssh/config
 
