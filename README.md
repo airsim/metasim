@@ -1,6 +1,7 @@
 MetaSim - Umbrella project for the Travel Market Simulator (TvlSim / AirSim)
 ============================================================================
 
+[![Docker Cloud build status](https://img.shields.io/docker/cloud/build/infrahelpers/tvlsim)](https://hub.docker.com/repository/docker/infrahelpers/tvlsim/general)
 [![Docker Repository on Quay](https://quay.io/repository/tvlsim/metasim/status "Docker Repository on Quay")](https://quay.io/repository/tvlsim/metasim)
 
 Development helpers for the simulator components.
@@ -11,7 +12,7 @@ One can then interact with any specific component directly by jumping
 (`cd`-ing) into the corresponding directory. Software code can be edited
 and committed directly from that component sub-directory.
 
-[Docker images, hosted on Docker Cloud](https://cloud.docker.com/u/tvlsim/repository/docker/tvlsim/metasim),
+[Docker images, hosted on Docker Cloud](https://hub.docker.com/r/infrahelpers/tvlsim/),
 are provided for convenience reason, avoiding the need to set up
 a proper development environment: they provide a ready-to-use,
 ready-to-develop, ready-to-contribute environment. Enjoy!
@@ -19,14 +20,14 @@ ready-to-develop, ready-to-contribute environment. Enjoy!
 # References
 * Travel/Airline Market Simulator (TvlSim / AirSim):
   + Source code on GitHub: https://github.com/airsim
-  + Docker Cloud repository: https://cloud.docker.com/u/tvlsim/repository/docker/tvlsim/metasim
+  + Docker Cloud repository: https://hub.docker.com/r/infrahelpers/tvlsim/
   + Official Web site: https://travel-sim.org
 
 # Run the Docker image
 * As a quick starter, some test cases can be launched from the
   [one of Docker images (_eg_, CentOS, Ubuntu or Debian)](docker/):
 ```bash
-$ docker run --rm -it tvlsim/metasim:centos bash
+$ docker run --rm -it infrahelpers/tvlsim:centos bash
 [build@c..5 metasim]$ cd workspace/build/tvlsim
 [build@c..5 tvlsim (master)]$ make check
 [build@c..5 tvlsim (master)]$ exit
@@ -45,7 +46,7 @@ a Docker container).
 An alternative is to develop your own Docker image from the
 [ones provided by that project](https://cloud.docker.com/u/tvlsim/repository/docker/tvlsim/metasim).
 You would typically start the `Dockerfile` with
-`FROM tvlsim/metasim:<linux-distribution>`.
+`FROM infrahelpers/tvlsim:<linux-distribution>`.
 
 ## Installation of dependencies (if not using the Docker image)
 C++, Python and Ruby are needed in order to build
@@ -61,17 +62,29 @@ _as is_, or used as inspiration for _ad hoc_ setup on other configurations.
 ### CentOS/RedHat
 * Install [EPEL for CentOS/RedHat](https://fedoraproject.org/wiki/EPEL):
 ```bash
-$ sudo rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7
+$ sudo rpm --import https://www.centos.org/keys/RPM-GPG-KEY-CentOS-Official && \
+  sudo rpm --import https://www.centos.org/keys/RPM-GPG-KEY-CentOS-Testing
 $ sudo yum -y install epel-release
 ```
 
-* Install a few useful packages:
+* Add the repository for CodeReady Linux Builder (CRB)
 ```bash
-$ sudo yum -y install less htop net-tools which sudo man vim \
+$ sudo dnf -y install 'dnf-command(config-manager)'
+$ sudo dnf config-manager --set-enabled crb
+```
+
+* Add EPEL support
+```bash
+$ sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+```
+
+* Install a few packages:
+```bash
+$ sudo dnf -y install less htop net-tools which sudo man vim \
         git-all wget curl file bash-completion keyutils Lmod \
-        zlib-devel bzip2-devel gzip tar rpmconf yum-utils \
-        gcc gcc-c++ cmake cmake3 m4 \
-		lcov cppunit-devel \
+        xz-devel zlib-devel bzip2-devel gzip tar rpmconf yum-utils \
+        gcc gcc-c++ cmake m4 \
+	lcov cppunit-devel \
         zeromq-devel czmq-devel cppzmq-devel \
         boost-devel xapian-core-devel openssl-devel libffi-devel \
         mpich-devel openmpi-devel \
@@ -79,11 +92,10 @@ $ sudo yum -y install less htop net-tools which sudo man vim \
         soci-mysql-devel soci-sqlite3-devel \
         libicu-devel protobuf-devel protobuf-compiler \
         python-devel \
-        python34 python34-pip python34-devel \
-        python2-django mod_wsgi \
+        python3-mod_wsgi \
         geos-devel geos-python \
         doxygen ghostscript "tex(latex)" texlive-epstopdf-bin \
-		rake rubygem-rake ruby-libs
+	rake rubygem-rake ruby-libs
 ```
 
 ### MacOS
@@ -92,9 +104,8 @@ $ sudo yum -y install less htop net-tools which sudo man vim \
 $ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 ```
 
-* SOCI. As of end of 2018, SOCI 4.0 has still not been released,
-  and `soci-mysql` is no longer available. Hence, SOCI must be built
-  from the sources. The following shows how to do that:
+* SOCI. When SOCI has to be built from the sources,
+  the following shows how to do that:
 ```bash
 $ mkdir -p ~/dev/infra/soci && cd ~/dev/infra/soci
 $ git clone https://github.com/SOCI/soci.git
@@ -129,8 +140,10 @@ if command -v pyenv 1>/dev/null 2>&1; then
     eval "\$(pyenv init -)"
 fi
 _EOF
-$ source ${HOME}/.bashrc && pyenv install 3.7.1
-$ pip3 install --user -U pipenv
+$ source ${HOME}/.bashrc && pyenv install 3.10.9 && \
+  pyenv global 3.10.9
+$ python -mpip install -U pip
+$ python -mpip install -U pipenv scikit-build build wheel setuptools pytest twine
 ```
 
 ## Clone the Git repository

@@ -2,7 +2,7 @@
 # http://github.com/airsim/metasim/tree/master/docker/ubuntu
 # Umbrella project for the Travel Market Simulator (TvlSim / AirSim)
 #
-FROM cpppythondevelopment/base:debian9
+FROM infrahelpers/cpppython:debian11
 MAINTAINER Denis Arnaud <denis.arnaud_github at m4x dot org>
 
 # Docker build time environment variables
