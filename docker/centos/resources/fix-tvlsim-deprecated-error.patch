@@ -1,8 +1,8 @@
 diff --git a/config/project_config_embeddable.cmake b/config/project_config_embeddable.cmake
-index c1f27ab1..68d9de7a 100644
+index 794e0cb9..18a9ab94 100644
 --- a/config/project_config_embeddable.cmake
 +++ b/config/project_config_embeddable.cmake
-@@ -1417,9 +1417,9 @@ macro (init_build)
+@@ -1510,9 +1510,9 @@ macro (init_build)
    if (NOT CMAKE_CXX_FLAGS)
  	#set (CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -Werror")
      if (${RUN_GCOV} STREQUAL "ON")
