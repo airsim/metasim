@@ -17,6 +17,7 @@ components:
     repo: 'https://github.com/airsim/avlcal.git'
     deps: [stdair, airrac, rmol, airinv]
   - name: airinv
+    branch: 1.00.3
     repo: 'https://github.com/airsim/airinv.git'
     deps: [stdair, airrac, rmol, sevmgr]
   - name: trademgen
