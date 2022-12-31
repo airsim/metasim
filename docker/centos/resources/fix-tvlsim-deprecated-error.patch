@@ -1,0 +1,16 @@
+diff --git a/config/project_config_embeddable.cmake b/config/project_config_embeddable.cmake
+index c1f27ab1..68d9de7a 100644
+--- a/config/project_config_embeddable.cmake
++++ b/config/project_config_embeddable.cmake
+@@ -1417,9 +1417,9 @@ macro (init_build)
+   if (NOT CMAKE_CXX_FLAGS)
+ 	#set (CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -Werror")
+     if (${RUN_GCOV} STREQUAL "ON")
+-	  set (CMAKE_CXX_FLAGS "-Wall -Werror -fprofile-arcs -ftest-coverage")
++	  set (CMAKE_CXX_FLAGS "-Wall -fprofile-arcs -ftest-coverage")
+     else (${RUN_GCOV} STREQUAL "ON")
+-      set (CMAKE_CXX_FLAGS "-Wall -Werror")
++      set (CMAKE_CXX_FLAGS "-Wall")
+ 	endif (${RUN_GCOV} STREQUAL "ON")
+   endif (NOT CMAKE_CXX_FLAGS)
+   # Tell the source code the version of Boost (only once)

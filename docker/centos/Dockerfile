@@ -31,13 +31,16 @@ RUN chmod 600 $HOME/.ssh/config $HOME/.ssh/known_hosts
 RUN mkdir -p $SIM_DIR
 WORKDIR $SIM_DIR
 
-ADD resources/Rakefile resources/metasim.yaml.sample resources/fix-airinv-deprecated-error.patch $SIM_DIR/
+ADD resources/Rakefile resources/metasim.yaml.sample resources/fix-airinv-deprecated-error.patch resources/fix-tvlsim-deprecated-error.patch $SIM_DIR/
 RUN mv $SIM_DIR/metasim.yaml.sample $SIM_DIR/metasim.yaml
 
 # Build and deliver all the components
 RUN rake checkout
 RUN cd $SIM_DIR/workspace/src/airinv && \
     patch -p1 < ../../../fix-airinv-deprecated-error.patch && \
+    cd $SIM_DIR
+RUN cd $SIM_DIR/workspace/src/tvlsim && \
+    patch -p1 < ../../../fix-tvlsim-deprecated-error.patch && \
     cd $SIM_DIR
 RUN rake offline=true configure
 RUN rake offline=true install
