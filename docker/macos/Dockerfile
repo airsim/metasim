@@ -59,10 +59,10 @@ ADD resources/Rakefile resources/metasim.yaml.sample $SIM_DIR/
 RUN mv $SIM_DIR/metasim.yaml.sample $SIM_DIR/metasim.yaml
 
 # Build and deliver all the components
-RUN rake checkout
-RUN rake offline=true configure
-RUN rake offline=true install
-RUN rake offline=true dist
+RUN source $HOME/.bashrc && rake checkout
+RUN source $HOME/.bashrc && rake offline=true configure
+RUN source $HOME/.bashrc && rake offline=true install
+RUN source $HOME/.bashrc && rake offline=true dist
 
 # Entry point
 CMD ["/bin/bash"]
