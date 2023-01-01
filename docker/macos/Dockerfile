@@ -26,14 +26,15 @@ RUN NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.co
 RUN source $HOME/.bashrc && \
 	brew install openssl@1.1 xz && \
 	brew install boost boost-python3 cmake libedit && \
-    brew install xapian sqlite mysql mysql-client && \
+	brew install xapian sqlite && \
+	brew install mysql mysql-client mysql++ mysql-connector-c++ && \
     brew install icu4c protobuf protobuf-c doxygen && \
     brew install homebrew/portable-ruby/portable-readline && \
     brew install cppzmq czmq zeromq
 
 # SOCI
 RUN source $HOME/.bashrc && \
-    git clone https://github.com/SOCI/soci.git socigit && \
+    git clone --depth 1 https://github.com/SOCI/soci.git socigit && \
     mkdir -p socigit/build/head && \
     cd socigit/build/head && \
     cmake -DCMAKE_INSTALL_PREFIX=/usr/local \
