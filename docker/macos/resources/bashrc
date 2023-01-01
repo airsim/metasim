@@ -1,0 +1,14 @@
+
+# Homebrew
+export BREW_DIR="/home/linuxbrew/.linuxbrew"
+export PATH="${BREW_DIR}/bin:${PATH}"
+
+# Ruby
+if command -v rbenv 1>/dev/null 2>&1
+then
+	eval "$(rbenv init -)"
+fi
+
+# Aliases
+alias dir='ls -laFh'
+

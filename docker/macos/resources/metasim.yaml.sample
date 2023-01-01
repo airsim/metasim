@@ -1,0 +1,45 @@
+# MetaSim configuration file
+default_base_repo: 'https://github.com/airsim'
+default_branch: master
+cmake_args: '-DREADLINE_ROOT=/usr/local/opt/portable-readline -DREADLINE_INCLUDE_DIR=/usr/local/opt/portable-readline/include -DREADLINE_LIBRARY=/usr/local/opt/libedit/lib/libedit.dylib -DICU_ROOT=/usr/local/opt/icu4c -DCMAKE_BUILD_TYPE:STRING=Debug -DINSTALL_DOC:BOOL=OFF -DENABLE_TEST:BOOL=ON -DRUN_GCOV:BOOL=OFF'
+publish_path: /tmp/metasim
+components:
+  - name: tvlsim
+    repo: 'https://github.com/airsim/tvlsim.git'
+    deps: [stdair, airrac, rmol, airinv, simfqt, airtsp, simcrs, trademgen, sevmgr, travelccm]
+  - name: simcrs
+    repo: 'https://github.com/airsim/simcrs.git'
+    deps: [stdair, airrac, rmol, sevmgr, airinv, simfqt, airtsp]
+  - name: simlfs
+    repo: 'https://github.com/airsim/simlfs.git'
+    deps: [stdair, airrac, rmol, sevmgr, airinv, simfqt]
+  - name: avlcal
+    repo: 'https://github.com/airsim/avlcal.git'
+    deps: [stdair, airrac, rmol, airinv]
+  - name: airinv
+    repo: 'https://github.com/airsim/airinv.git'
+    deps: [stdair, airrac, rmol, sevmgr]
+  - name: trademgen
+    repo: 'https://github.com/airsim/trademgen.git'
+    deps: [stdair, sevmgr]
+  - name: rmol
+    repo: 'https://github.com/airsim/rmol.git'
+    deps: [stdair, airrac]
+  - name: simfqt
+    repo: 'https://github.com/airsim/simfqt.git'
+    deps: [stdair]
+  - name: airtsp
+    repo: 'https://github.com/airsim/airtsp.git'
+    deps: [stdair]
+  - name: travelccm
+    repo: 'https://github.com/airsim/travelccm.git'
+    deps: [stdair]
+  - name: sevmgr
+    repo: 'https://github.com/airsim/sevmgr.git'
+    deps: [stdair]
+  - name: airrac
+    repo: 'https://github.com/airsim/airrac.git'
+    deps: [stdair]
+  - name: stdair
+    repo: 'https://github.com/airsim/stdair.git'
+    deps: {}

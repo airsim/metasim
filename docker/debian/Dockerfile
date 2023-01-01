@@ -1,9 +1,18 @@
 #
-# http://github.com/airsim/metasim/tree/master/docker/ubuntu
+# Dockerfile: http://github.com/airsim/metasim/tree/master/docker/debian/Dockerfile
+# Docker Hub/Cloud page: https://cloud.docker.com/u/infrahelpers/repository/docker/infrahelpers/tvlsim
+# Usual Docker tag: infrahelpers/tvlsim:debian
+#
 # Umbrella project for the Travel Market Simulator (TvlSim / AirSim)
 #
+# Base image:
+# * Dockerfile: http://github.com/cpp-projects-showcase/docker-images/tree/master/debian11
+# * Docker Hub/Cloud: https://cloud.docker.com/u/infrahelpers/repository/docker/infrahelpers/cpppython
+# * Docker tag: infrahelpers/cpppython:debian11
+#
 FROM infrahelpers/cpppython:debian11
-MAINTAINER Denis Arnaud <denis.arnaud_github at m4x dot org>
+
+LABEL authors="Denis Arnaud <denis.arnaud_github at m4x dot org>"
 
 # Docker build time environment variables
 ENV container docker

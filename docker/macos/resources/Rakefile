@@ -1,0 +1,276 @@
+require 'yaml'
+
+# MetaSim root path
+ROOT_PATH = File.expand_path File.dirname(__FILE__)
+
+# Load the YAML configuration file
+CONF_FILE = File.join ROOT_PATH, 'metasim.yaml'
+CONF = File.open(CONF_FILE) { |f| YAML.load f }
+raise "Unable to load YAML configuration file from #{CONF_FILE}" unless CONF
+CONF.each do |param, val|
+  Object.const_set "CONF_#{param.upcase}", val
+end
+
+[
+  'components',
+  'default_branch',
+  'default_base_repo',
+  'cmake_args',
+  'publish_path'
+].each do |param|
+  raise "Missing mandatory parameter '#{param}' in configuration file." unless CONF[param]
+end
+
+if CONF_COMPONENTS.kind_of? Hash
+  STDERR.puts "Warning: obsolete components syntax loaded from configuration file."
+  CONF_COMPONENTS = CONF_COMPONENTS.map { |k,v| {'name' => k}.merge v }
+end
+
+COMPONENTS = CONF_COMPONENTS.map { |c| c['name'] }
+
+# MetaSim workspace
+WORK_PATH = File.join ROOT_PATH, 'workspace'
+
+# Required binaries
+BINARIES = ['git', 'cmake', 'make']
+BINARIES.each do |bin|
+  bin_path = %x[ which #{bin} ].strip
+  if bin == 'cmake'
+    cmake3_path = %x[ which cmake3 ].strip
+    if not cmake3_path == ''
+      bin_path = cmake3_path
+    end
+  end
+  raise "Executable #{bin} not found!" unless File.executable?(bin_path)
+  Object.const_set "#{bin.upcase}_BIN", bin_path
+end
+
+# Number of make jobs
+MAKE_JOBS = [ENV['jobs'].to_i, 1].max
+
+# Path to cloned sources
+def component_src_path(cmp)
+  File.join WORK_PATH, 'src', cmp
+end
+
+# Path to build output
+def component_build_path(cmp)
+  File.join WORK_PATH, 'build', cmp
+end
+
+# Path to installed components
+def component_install_path(cmp)
+  File.join WORK_PATH, 'install', cmp
+end
+
+# Run a shell command
+def do_shell(cmd)
+  puts "[METASIM]:#{Dir.pwd}$ #{cmd}"
+  raise "Shell command failure" unless system(cmd)
+end
+
+def component(cmp)
+  CONF_COMPONENTS.select { |c| c['name'] == cmp }.first
+end
+
+# Lookup the Git branch of a component
+def component_branch(cmp)
+  component(cmp).fetch('branch', CONF_DEFAULT_BRANCH)
+end
+
+# Lookup the build dependencies of a component
+def component_deps(cmp)
+  component(cmp).fetch('deps', [])
+end
+
+# Lookup the repository of a component
+def component_repo(cmp)
+  component(cmp).fetch('repo', "#{CONF_DEFAULT_BASE_REPO}/#{cmp}.git")
+end
+
+# Lookup the CMake variables of a component
+def lookup_cmake_vars(cmp) 
+  cmp_src_path = component_src_path cmp
+  cmp_build_path = component_build_path cmp
+  cmake_vars = {}
+  if File.executable?(cmp_src_path) && File.executable?(cmp_build_path)
+    ::Dir.chdir(cmp_build_path) do
+      result = %x[ #{CMAKE_BIN} -N -LA #{cmp_src_path} ]
+      if $?.success?
+        result.split("\n").each do |line|
+          variable, value = line.split(':', 2)
+          cmake_vars[variable] = value.split('=', 2).last if value
+        end
+      else
+        STDERR.puts "CMake error while loading the cache from #{cmp_build_path}"
+      end
+    end
+  end
+  cmake_vars
+end
+
+COMPONENTS_CMAKE_VARS = {}
+
+def component_cmake_vars(cmp)
+  COMPONENTS_CMAKE_VARS[cmp] ||= lookup_cmake_vars cmp
+end
+
+# Version of a component
+def component_version(cmp)
+  component_cmake_vars(cmp)['PACKAGE_VERSION']
+end
+
+# Library path of a component
+def component_libpath(cmp)
+  vars = component_cmake_vars cmp
+  libdir = vars.fetch('INSTALL_LIB_DIR', 'lib')
+  File.join component_install_path(cmp), libdir
+end
+
+# Makefile of a component
+def component_makefile(cmp)
+  File.join component_build_path(cmp), 'Makefile'
+end
+
+desc "Display configuration information"
+task :info do
+  puts "Components:"
+  COMPONENTS.each do |cmp|
+    cmp_deps = component_deps cmp
+    cmp_repo = component_repo cmp
+    cmp_branch = component_branch cmp
+    cmp_version = component_version cmp
+    cmp_libpath = component_libpath cmp
+    puts " * #{cmp}"
+    puts "   Git repository   : #{cmp_repo}"
+    puts "   Checkout branch  : #{cmp_branch}"
+    puts "   Depends on       : #{cmp_deps.join ', '}" unless cmp_deps.empty?
+    puts "   Source cloned at : #{component_src_path cmp}"
+    puts "   Built from       : #{component_build_path cmp}"
+    puts "   Installed to     : #{component_install_path cmp}"
+    puts "   Library path     : #{cmp_libpath}"
+    puts "   Release version  : #{cmp_version}" if cmp_version
+    puts
+  end
+  puts "CMake arguments : #{CONF_CMAKE_ARGS}"
+  puts "Publish to      : #{CONF_PUBLISH_PATH}"
+end
+
+directory WORK_PATH
+
+# Define all global tasks
+
+SIMPLE_GIT_TASKS = [
+  :status, :push, :pull
+]
+SIMPLE_MAKE_TASKS = [
+  :check, :install, :clean, :rebuild_cache
+]
+COMPLEX_TASKS = [
+  :clone, :checkout, :configure, :dist
+]
+(SIMPLE_GIT_TASKS + SIMPLE_MAKE_TASKS + COMPLEX_TASKS).each do |t|
+  desc "#{t.to_s.capitalize} on all components"
+  task t
+end
+
+COMPONENTS.each do |cmp|
+  cmp_deps = component_deps cmp
+  cmp_repo = component_repo cmp
+  cmp_branch = component_branch cmp
+  cmp_src_path = component_src_path cmp
+  cmp_build_path = component_build_path cmp
+  cmp_install_path = component_install_path cmp
+  cmp_makefile = component_makefile cmp
+   
+  # Clone tasks
+  
+  file cmp_src_path => WORK_PATH do
+    do_shell "#{GIT_BIN} clone -n #{cmp_repo} #{cmp_src_path}"
+  end
+  desc "Clone component #{cmp} in #{cmp_src_path}"
+  task "clone_#{cmp}" => cmp_src_path
+  task :clone => "clone_#{cmp}"
+
+  # Wrappers for simple git tasks
+    
+  SIMPLE_GIT_TASKS.each do |gittask|
+    cmp_task = "#{gittask}_#{cmp}"
+    desc "#{gittask.to_s.capitalize} on component #{cmp} in #{cmp_src_path}"
+    task cmp_task => cmp_src_path do
+      ::Dir.chdir(cmp_src_path) do
+        do_shell "#{GIT_BIN} #{gittask}"
+      end
+    end
+    task gittask => cmp_task
+  end
+  
+  # Checkout tasks
+  
+  desc "Checkout branch #{cmp_branch} of component #{cmp}"
+  task "checkout_#{cmp}" do
+    ::Dir.chdir(cmp_src_path) do
+      do_shell "#{GIT_BIN} checkout #{cmp_branch}"
+    end
+  end
+  task("checkout_#{cmp}" => "pull_#{cmp}") unless ENV['offline']
+  task :checkout => "checkout_#{cmp}"
+  
+  # Configuration tasks
+   
+  cmake_deps_args = cmp_deps.map { |dep| "-DWITH_#{dep.upcase}_PREFIX=#{component_install_path dep}" }.join ' '
+  
+  config_prereqs = ["checkout_#{cmp}"] + cmp_deps.map { |dep| "install_#{dep}" }
+  
+  file cmp_makefile => config_prereqs do
+    mkdir_p cmp_build_path
+    ::Dir.chdir(cmp_build_path) do
+      do_shell "#{CMAKE_BIN} #{cmake_deps_args} #{CONF_CMAKE_ARGS} -DCMAKE_INSTALL_PREFIX=#{cmp_install_path} #{cmp_src_path}"
+    end
+  end
+  desc "Configure component #{cmp} in #{cmp_build_path}"
+  task "configure_#{cmp}" => cmp_makefile
+  task :configure => "configure_#{cmp}"
+
+  # Wrappers for simple make tasks
+
+  SIMPLE_MAKE_TASKS.each do |maketask|
+    cmp_task = "#{maketask}_#{cmp}"
+    desc "#{maketask.to_s.capitalize} on component #{cmp} in #{cmp_build_path}"
+    task cmp_task => cmp_makefile do
+      ::Dir.chdir(cmp_build_path) do
+        do_shell "#{MAKE_BIN} -j#{MAKE_JOBS} #{maketask}"
+      end
+    end
+    task maketask => cmp_task
+  end
+ 
+  # Distribution tasks
+  
+  cmp_version = component_version cmp
+  if cmp_version
+    arch_name = "#{cmp}-#{cmp_version}.tar.bz2"
+    arch_path_src = File.join cmp_build_path, arch_name
+    
+    file arch_path_src => cmp_makefile do
+      ::Dir.chdir(cmp_build_path) do
+        do_shell "#{MAKE_BIN} dist"
+      end
+    end
+    
+    directory CONF_PUBLISH_PATH
+    
+    arch_path_dst = File.join CONF_PUBLISH_PATH, arch_name
+    
+    file arch_path_dst => [arch_path_src, CONF_PUBLISH_PATH] do
+      cp arch_path_src, arch_path_dst
+    end
+    desc "Publish component #{cmp} to #{arch_path_dst}"
+    task "dist_#{cmp}" => arch_path_dst
+    task :dist => "dist_#{cmp}"
+  else
+    puts "Warning: package version of component #{cmp} is not available. You have to install it first."
+  end
+end
+
+task :default => :install

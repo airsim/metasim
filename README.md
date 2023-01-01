@@ -4,12 +4,14 @@ MetaSim - Umbrella project for the Travel Market Simulator (TvlSim / AirSim)
 [![Docker Cloud build status](https://img.shields.io/docker/cloud/build/infrahelpers/tvlsim)](https://hub.docker.com/repository/docker/infrahelpers/tvlsim/general)
 [![Docker Repository on Quay](https://quay.io/repository/tvlsim/metasim/status "Docker Repository on Quay")](https://quay.io/repository/tvlsim/metasim)
 
-Development helpers for the simulator components.
+[This project](https://github.com/airsim/metasim)
+proposes development helpers for the simulator components.
 
-The `metasim` project itself is an umbrella, allowing to drive all
-the other components from a central local directory, namely `workspace/`.
+The [`metasim` project itself](https://github.com/airsim/metasim) is
+an umbrella, allowing to drive all the other components from a central
+local directory, namely `workspace/`.
 One can then interact with any specific component directly by jumping
-(`cd`-ing) into the corresponding directory. Software code can be edited
+(`cd`-ing) into the corresponding directory. Software code may be edited
 and committed directly from that component sub-directory.
 
 [Docker images, hosted on Docker Cloud](https://hub.docker.com/r/infrahelpers/tvlsim/),
@@ -24,8 +26,8 @@ ready-to-develop, ready-to-contribute environment. Enjoy!
   + Official Web site: https://travel-sim.org
 
 # Run the Docker image
-* As a quick starter, some test cases can be launched from the
-  [one of Docker images (_eg_, CentOS, Ubuntu or Debian)](docker/):
+* As a quick starter, some test cases can be launched from
+  [one of Docker images](docker/) (_e.g._, CentOS, Ubuntu, Debian or MacOS):
 ```bash
 $ docker run --rm -it infrahelpers/tvlsim:centos bash
 [build@c..5 metasim]$ cd workspace/build/tvlsim
@@ -149,8 +151,9 @@ $ python -mpip install -U pipenv scikit-build build wheel setuptools pytest twin
 ## Clone the Git repository
 The following operation needs to be done only on a native environment (as
 opposed to within a Docker container).
-The Docker image indeed comes with that Git repository already cloned and built.
-In the following, `<linux-distrib>` may be one of `centos`, `ubuntu` or `debian`.
+The Docker image indeed comes with that Git repository already cloned
+and built. In the following, `<linux-distrib>` may be one of `centos`,
+`ubuntu`, `debian` or `macos`.
 ```bash
 $ mkdir -p ~/dev/sim && cd ~/dev/sim
 $ git clone https://github.com/airsim/metasim.git
@@ -166,17 +169,19 @@ That operation may be done either from within the Docker container,
 or in a native environment (on which the dependencies have been installed).
 
 As a reminder, to enter into the container, just type
-`docker run --rm -it tvlsim/metasim:<linux-distrib> bash`, and `exit`
-to leave it (`<linux-distrib>` may be one of `centos`, `ubuntu` or `debian`).
+`docker run --rm -it infrahelpers/metasim:<linux-distrib> bash`, and `exit`
+to leave it (`<linux-distrib>` may be one of `centos`, `ubuntu`, `debian`
+or even `macos`).
 
 The following sequence of commands describes how to build, test and deliver
-the artefacts of all the components, so that a full simulation may be performed:
+the artifacts of all the components, so that a full simulation
+may be performed:
 ```bash
 $ cd ~/dev/sim/metasim
 $ rm -rf workspace/build workspace/install
 $ rake offline=true configure
 $ rake offline=true install
-$ rake offline=true test
+$ rake offline=true check
 $ rake offline=true dist
 ```
 
@@ -185,8 +190,9 @@ Those operations may be done either from within the Docker container,
 or in a native environment (on which the dependencies have been installed).
 
 As a reminder, to enter into the container, just type
-`docker run --rm -it tvlsim/metasim:<linux-distrib> bash`, and `exit`
-to leave it (`<linux-distrib>` may be one of `centos`, `ubuntu` or `debian`).
+`docker run --rm -it infrahelpers/metasim:<linux-distrib> bash`, and `exit`
+to leave it (`<linux-distrib>` may be one of `centos`, `ubuntu`, `debian`
+or even `macos`).
 
 ```bash
 $ cd ~/dev/sim/metasim
@@ -211,16 +217,18 @@ how to do it:
 $ mkdir -p ~/dev/sim && cd ~/dev/sim
 $ git clone https://github.com/airsim/metasim.git
 $ cd metasim
-$ docker build -t tvlsim/metasim:centos --squash docker/centos/
-$ docker push tvlsim/metasim:centos
-$ docker build -t tvlsim/metasim:debian --squash docker/debian/
-$ docker push tvlsim/metasim:debian
-$ docker build -t tvlsim/metasim:ubuntu --squash docker/ubuntu/
-$ docker push tvlsim/metasim:ubuntu
+$ docker build -t infrahelpers/metasim:centos --squash docker/centos/
+$ docker push infrahelpers/metasim:centos
+$ docker build -t infrahelpers/metasim:debian --squash docker/debian/
+$ docker push infrahelpers/metasim:debian
+$ docker build -t infrahelpers/metasim:ubuntu --squash docker/ubuntu/
+$ docker push infrahelpers/metasim:ubuntu
+$ docker build -t infrahelpers/metasim:macos --squash docker/macos/
+$ docker push infrahelpers/metasim:macos
 $ docker images | grep "^bom4v"
-REPOSITORY       TAG        IMAGE ID        CREATED             SIZE
-tvlsim/metasim    centos       9a33eee22a3d    About an hour ago   2.16GB
-tvlsim/metasim    debian       c5f1ea63a79b    2 hours ago         1.95GB
-tvlsim/metasim    ubuntu       d5f1ea63a79c    2 hours ago         2.66GB
+REPOSITORY            TAG     IMAGE ID      CREATED             SIZE
+infrahelpers/metasim  centos  9a33eee22a3d  About an hour ago   2.16GB
+infrahelpers/metasim  debian  c5f1ea63a79b  2 hours ago         1.95GB
+infrahelpers/metasim  ubuntu  d5f1ea63a79c  2 hours ago         2.66GB
 ```
 
